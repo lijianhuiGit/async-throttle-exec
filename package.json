@@ -1,0 +1,24 @@
+{
+  "name": "async-throttle-exec",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lijianhuiGit/async-throttle-exec.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lijianhuiGit/async-throttle-exec/issues"
+  },
+  "homepage": "https://github.com/lijianhuiGit/async-throttle-exec#readme",
+  "devDependencies": {
+    "typescript": "^3.9.6"
+  }
+}
