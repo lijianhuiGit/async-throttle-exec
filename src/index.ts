@@ -22,7 +22,7 @@ export default class AsyncThrottle {
   namespaces: string
   cacheDatas: { [key: string]: any } = {}
   execHappenings: ExecHappenings = {}
-  constructor(exec: Exec, namespaces: string = '') {
+  constructor(exec: Exec, namespaces: string) {
     this.exec = exec
     this.namespaces = namespaces
   }
