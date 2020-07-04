@@ -27,7 +27,7 @@ export default class AsyncThrottle {
     this.namespaces = namespaces
   }
   throttleExec(options: Options = {}, ...args: any[]): Promise<any> {
-    if (options.cacheType !== 'instance' && !options.key) {
+    if (!options.key && (options.cacheType === 'sessionStorage' || options.cacheType === 'localStorage')) {
       console.warn('throttleExec方法请提供“key”!')
     }
     const ops = { key: options.key || 'default', cacheType: options.cacheType }
@@ -40,7 +40,7 @@ export default class AsyncThrottle {
         this.execHappenings[ops.key].resolves.push(resolve)
         this.execHappenings[ops.key].rejects.push(reject)
       } else {
-        this.execHappenings[ops.key] = { status: 'pending', resolves: [], rejects: [] }
+        this.execHappenings[ops.key] = { status: 'pending', resolves: [resolve], rejects: [reject] }
         try {
           const result = await this.exec(...args)
           if (result != null && ops.cacheType) {
@@ -70,13 +70,13 @@ export default class AsyncThrottle {
   clearCache(key: string): boolean {
     const k = `AT_${ this.namespaces ? (this.namespaces + '_') : '' }${ key }`
 
-    const hasExamplesCache = this.cacheDatas[key]
+    const hasExamplesCache = this.cacheDatas[key] != null
     hasExamplesCache && delete this.cacheDatas[key]
 
-    const hasSessionCache = sessionStorage.getItem(k)
+    const hasSessionCache = sessionStorage.getItem(k) != null
     hasSessionCache && sessionStorage.removeItem(k)
 
-    const hasLocalCache = localStorage.getItem(k)
+    const hasLocalCache = localStorage.getItem(k) != null
     hasLocalCache && localStorage.removeItem(k)
 
     return (hasExamplesCache || hasSessionCache || hasLocalCache)
