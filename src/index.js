@@ -1,41 +1,10 @@
-// 执行函数
-type ExecFunction = (...args: any[]) => Promise<any>
-
-// 缓存类型
-type CacheType = false | 'instance' | 'sessionStorage' | 'localStorage'
-
-// 节流执行函数参数选项
-interface ThrottleExecOptions {
-  key?: string,
-  cacheType?: CacheType
-}
-
-// 构造函数参数选项
-interface ConstructorOptions extends ThrottleExecOptions {
-  namespace?: string
-}
-
-// 当前执行情况
-interface ExecHappenings {
-  [key: string]: {
-    status: 'pending',
-    resolves: any[],
-    rejects: any[]
-  }
-}
-
 /**
  * # 异步节流
  * @param execFunction 返回Promose对象的执行函数
  * @param options { key: '默认key', cacheType: '默认缓存类型', namespace: '命名空间' }
  */
 export default class AsyncThrottle {
-  static namespaces: string[] = []
-  exec: ExecFunction
-  options: ConstructorOptions
-  cacheDatas: { [key: string]: any } = {}
-  execHappenings: ExecHappenings = {}
-  constructor(execFunction: ExecFunction, options: ConstructorOptions = {}) {
+  constructor(execFunction, options = {}) {
     if (options.namespace) {
       try {
         if (AsyncThrottle.namespaces.includes(options.namespace)) {
@@ -53,6 +22,8 @@ export default class AsyncThrottle {
       cacheType: (options.cacheType === undefined ? false : options.cacheType),
       namespace: options.namespace
     }
+    this.cacheDatas = {}
+    this.execHappenings = {}
   }
 
   /**
@@ -60,8 +31,8 @@ export default class AsyncThrottle {
    * @param options { key: 缓存key, cacheType: 缓存类型 }
    * @param args 执行函数参数
    */
-  throttleExec(options: ThrottleExecOptions = {}, ...args: any[]): Promise<any> {
-    const ops: ThrottleExecOptions = {
+  throttleExec(options = {}, ...args) {
+    const ops = {
       key: options.key || this.options.key,
       cacheType: (options.cacheType === undefined ? this.options.cacheType : options.cacheType)
     }
@@ -72,7 +43,7 @@ export default class AsyncThrottle {
     } catch (e) {
       console.error(e)
     }
-    const key = (ops.key as string)
+    const key = ops.key
     if (ops.cacheType) {
       const cache = this.getCache(key)
       if (cache != null) {
@@ -104,13 +75,13 @@ export default class AsyncThrottle {
    * @param options { key: 缓存key, cacheType: 缓存类型 }
    * @param data 缓存数据
    */
-  setCache (options: ThrottleExecOptions = {}, data: any): void {
+  setCache (options = {}, data) {
     const ops = {
       key: options.key || this.options.key,
       cacheType: (options.cacheType === undefined ? this.options.cacheType : options.cacheType)
     }
     if (ops.cacheType === 'instance') {
-      this.cacheDatas[(ops.key as string)] = data
+      this.cacheDatas[ops.key] = data
     } else if (ops.cacheType === 'sessionStorage' || ops.cacheType === 'localStorage') {
       const k = `AT_${ this.options.namespace ? (this.options.namespace + '_') : '' }${ ops.key }`
       const d = (typeof data === 'string') ? data : JSON.stringify(data);
@@ -123,10 +94,10 @@ export default class AsyncThrottle {
    * @param key 缓存key
    * @return 缓存数据
    */
-  getCache (key: string): any {
+  getCache (key) {
     const KEY = key || this.options.key
     const StorageKEY = `AT_${ this.options.namespace ? (this.options.namespace + '_') : '' }${ KEY }`
-    return JSON.parse((localStorage.getItem(StorageKEY) || sessionStorage.getItem(StorageKEY) as string)) || this.cacheDatas[(KEY as string)]
+    return JSON.parse(localStorage.getItem(StorageKEY) || sessionStorage.getItem(StorageKEY)) || this.cacheDatas[KEY]
   }
 
   /**
@@ -134,12 +105,12 @@ export default class AsyncThrottle {
    * @param key 缓存key
    * @rerun true: 清除成功（有缓存）false: 清除无效（没有缓存）
    */
-  clearCache(key?: string): boolean {
-    let hasLocalCache: boolean = false
-    let hasSessionCache: boolean = false
-    let hasInstanceCache: boolean = false
+  clearCache(key) {
+    let hasLocalCache = false
+    let hasSessionCache = false
+    let hasInstanceCache = false
     if (key) {
-      const KEY = ((key || this.options.key) as string)
+      const KEY = key || this.options.key
       const StorageKEY = `AT_${ this.options.namespace ? (this.options.namespace + '_') : '' }${ KEY }`
 
       hasLocalCache = localStorage.getItem(StorageKEY) != null
@@ -158,7 +129,7 @@ export default class AsyncThrottle {
       const reg = new RegExp('AT_' + this.options.namespace)
       const localCacheKeys = []
       for (let i = 0, len = localStorage.length; i < len; i++) {
-        const KEY = (localStorage.key(i) as string)
+        const KEY = localStorage.key(i)
         if (KEY.search(reg) === 0) {
           localCacheKeys.push(KEY)
         }
@@ -169,7 +140,7 @@ export default class AsyncThrottle {
       })
       const sessionCacheKeys = []
       for (let i = 0, len = sessionStorage.length; i < len; i++) {
-        const KEY = (sessionStorage.key(i) as string)
+        const KEY = sessionStorage.key(i)
         if (KEY.search(reg) === 0) {
           sessionCacheKeys.push(KEY)
         }
@@ -188,3 +159,5 @@ export default class AsyncThrottle {
     return (hasLocalCache || hasSessionCache || hasInstanceCache)
   }
 }
+
+AsyncThrottle.namespaces = []

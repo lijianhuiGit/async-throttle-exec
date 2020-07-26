@@ -1,24 +1,27 @@
 {
   "name": "async-throttle-exec",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "tsc ./src/index.ts",
+    "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lijianhuiGit/async-throttle-exec.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["async-throttle", "async-throttle-exec"],
+  "author": "lijianhui",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/lijianhuiGit/async-throttle-exec/issues"
   },
   "homepage": "https://github.com/lijianhuiGit/async-throttle-exec#readme",
   "devDependencies": {
-    "typescript": "^3.9.6"
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "rollup": "^2.22.2",
+    "rollup-plugin-babel": "^4.4.0"
   }
 }
