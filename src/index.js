@@ -109,52 +109,52 @@ export default class AsyncThrottle {
     let hasLocalCache = false
     let hasSessionCache = false
     let hasInstanceCache = false
-    if (key) {
-      const KEY = key || this.options.key
-      const StorageKEY = `AT_${ this.options.namespace ? (this.options.namespace + '_') : '' }${ KEY }`
-
-      hasLocalCache = localStorage.getItem(StorageKEY) != null
-      hasLocalCache && localStorage.removeItem(StorageKEY)
-
-      hasSessionCache = sessionStorage.getItem(StorageKEY) != null
-      hasSessionCache && sessionStorage.removeItem(StorageKEY)
-
-      hasInstanceCache = this.cacheDatas[KEY] != null
-      hasInstanceCache && delete this.cacheDatas[KEY]
-
+    if (key === true) {
+      if (this.options.namespace) {
+        const reg = new RegExp('AT_' + this.options.namespace)
+        const localCacheKeys = []
+        for (let i = 0, len = localStorage.length; i < len; i++) {
+          const KEY = localStorage.key(i)
+          if (KEY.search(reg) === 0) {
+            localCacheKeys.push(KEY)
+          }
+        }
+        hasLocalCache = !!(localCacheKeys.length)
+        localCacheKeys.forEach(k => {
+          localStorage.removeItem(k)
+        })
+        const sessionCacheKeys = []
+        for (let i = 0, len = sessionStorage.length; i < len; i++) {
+          const KEY = sessionStorage.key(i)
+          if (KEY.search(reg) === 0) {
+            sessionCacheKeys.push(KEY)
+          }
+        }
+        hasSessionCache = !!(sessionCacheKeys.length)
+        sessionCacheKeys.forEach(k => {
+          sessionStorage.removeItem(k)
+        })
+      }
+  
+      hasInstanceCache = !!(Object.keys(this.cacheDatas).length)
+      if (hasInstanceCache) {
+        this.cacheDatas = {}
+      }
+  
       return (hasLocalCache || hasSessionCache || hasInstanceCache)
     }
+    
+    const KEY = key || this.options.key
+    const StorageKEY = `AT_${ this.options.namespace ? (this.options.namespace + '_') : '' }${ KEY }`
 
-    if (this.options.namespace) {
-      const reg = new RegExp('AT_' + this.options.namespace)
-      const localCacheKeys = []
-      for (let i = 0, len = localStorage.length; i < len; i++) {
-        const KEY = localStorage.key(i)
-        if (KEY.search(reg) === 0) {
-          localCacheKeys.push(KEY)
-        }
-      }
-      hasLocalCache = !!(localCacheKeys.length)
-      localCacheKeys.forEach(k => {
-        localStorage.removeItem(k)
-      })
-      const sessionCacheKeys = []
-      for (let i = 0, len = sessionStorage.length; i < len; i++) {
-        const KEY = sessionStorage.key(i)
-        if (KEY.search(reg) === 0) {
-          sessionCacheKeys.push(KEY)
-        }
-      }
-      hasSessionCache = !!(sessionCacheKeys.length)
-      sessionCacheKeys.forEach(k => {
-        sessionStorage.removeItem(k)
-      })
-    }
+    hasLocalCache = localStorage.getItem(StorageKEY) != null
+    hasLocalCache && localStorage.removeItem(StorageKEY)
 
-    hasInstanceCache = !!(Object.keys(this.cacheDatas).length)
-    if (hasInstanceCache) {
-      this.cacheDatas = {}
-    }
+    hasSessionCache = sessionStorage.getItem(StorageKEY) != null
+    hasSessionCache && sessionStorage.removeItem(StorageKEY)
+
+    hasInstanceCache = this.cacheDatas[KEY] != null
+    hasInstanceCache && delete this.cacheDatas[KEY]
 
     return (hasLocalCache || hasSessionCache || hasInstanceCache)
   }
